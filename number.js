@@ -7,10 +7,13 @@ Integer = function (s) {
         nums = [],
         len = 0;
 
+    if (s === '0') {
+        sign = 0;
+    }
     if (s[0] === '-') {
         sign = -1;
         s = s.slice(1);
-    }
+    }    
     nums.push(parseInt(s.slice(-NUM_SIZE), 10));
     s = s.slice(0, -NUM_SIZE);
     for (len = s.length; len !== 0; len = s.length) {
@@ -24,6 +27,7 @@ Integer = function (s) {
         return nums.slice();
     };
 };
+
 Integer.prototype.toString = function () {
     var result = '',
         nums = this.getNums(),
@@ -59,6 +63,25 @@ Integer.prototype.neg = function () {
     }
     return new Integer('-' + s);
 };
+Integer.prototype.isZero = function () {
+    return this.getSign() === 0;
+};
+Integer.prototype.isPositive = function () {
+    return this.getSign() === 1;
+};
+Integer.prototype.isNegative = function () {
+    return this.getSign() === -1;
+};
+Integer.prototype.factorial = function () {
+    var result = new Integer('1'),
+        t = new Integer(this.toString()),
+        one = new Integer('1');
+
+    for (;t.isPositive(); t = t.sub(one)) {
+        result = result.mul(t);        
+    }
+    return result;
+};
 Integer.prototype.add = function (integer) {
     var nums1 = this.getNums(),
         sign1 = this.getSign(),
@@ -78,7 +101,7 @@ Integer.prototype.add = function (integer) {
         result = '',
         s,
         flag;
-    
+
     if (len1 > len2) {
         nums3 = nums1;
         len3 = len1;
@@ -238,6 +261,26 @@ Integer.prototype.mul = function (z) {
 Integer.prototype.sub = function (z) {
     return this.add(z.neg());
 };
+Integer.prototype.equal = function (z) {
+    return this.toString() === z.toString();
+};
+Integer.prototype.lt = function (z) {
+    return this.sub(z).isNegative();
+};
+Integer.prototype.le = function (z) {
+    var t = this.sub(z);
+    
+    return t.isNegative() || t.isZero();
+};
+Integer.prototype.gt = function (z) {
+    return this.sub(z).isPositive();
+};
+Integer.prototype.ge = function (z) {
+    var t = this.sub(z);
+    
+    return t.isPositive() || t.isZero();
+};
+
 var n = new Integer('1234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234511111111111111111111111111111111111111111111111111111111111111111111111111111111123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451111111111111111111111111111111111111111111111111111111111111111111111111111111112345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345111111111111111111111111111111111111111111111111111111111111111111111111111111111234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234511111111111111111111111111111111111111111111111111111111111111111111111111100000'),
     m = new Integer("111111111112345");
 
@@ -256,3 +299,20 @@ console.log(n.sub(n).toString() === '0')
 console.log(m.sub(m).toString() === '0')
 console.log(n.sub(m).toString() === '-1234524691357802469135780')
 console.log(m.sub(n).toString() === '1234524691357802469135780')
+
+n = new Integer('100');
+console.log(n.factorial().toString() === '93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000');
+console.log(new Integer('0').factorial().toString() === '1');
+console.log(new Integer('1').factorial().toString() === '1');
+console.log(new Integer('10').factorial().toString() === '3628800');
+
+n = new Integer("12345");
+m = new Integer("-12345");
+console.log(n.equal(n));
+console.log(!n.equal(m));
+console.log(!n.lt(m));
+console.log(!n.le(m));
+console.log(n.gt(m));
+console.log(n.ge(m));
+console.log(n.le(n));
+console.log(m.ge(m));
