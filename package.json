@@ -1,0 +1,32 @@
+{
+  "name": "kjs-math-number",
+  "version": "1.0.0",
+  "description": "Multiple Precision Integer",
+  "main": "number.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "chai": "^3.5.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.0.1"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamimura/kjs-math-number.git"
+  },
+  "keywords": [
+    "math"
+  ],
+  "author": "kamimura",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kamimura/kjs-math-number/issues"
+  },
+  "homepage": "https://github.com/kamimura/kjs-math-number#readme"
+}

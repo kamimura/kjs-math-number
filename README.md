@@ -1,1 +1,1 @@
-# kjs-math-number
+# kjs-math-number (Multiple Precision Integer JavaScript Library)
