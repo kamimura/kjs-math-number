@@ -1,7 +1,421 @@
 var RADIX = Math.pow(10, 5),
     NUM_SIZE = Math.log10(RADIX);
 
-Integer = function (s) {
+Number.prototype.neg = function () {
+    var n = this.valueOf();
+
+    if (n === 0) {
+        return 0;
+    }
+    return -this.valueOf();
+};
+Number.prototype.getSign = function () {
+    var n = this.valueOf();
+    
+    if (n < 0) {
+        return -1;
+    }
+    if (n === 0) {
+        return 0;
+    }
+    if (n > 0) {
+        return 1;
+    }
+};
+Number.prototype.isZero = function () {
+    return this.getSign() === 0;
+};
+Number.prototype.isPositive = function () {
+    return this.getSign() === 1;
+};
+Number.prototype.isNegative = function () {
+    return this.getSign() === -1;
+};
+Number.prototype.isEqual =function (z) {
+    if (typeof z === 'number') {
+        return this.valueOf() === z;
+    }
+    return z.isEqual(this.valueOf());
+};
+Complex = function (real, imag) {
+    var real = real,
+        imag = imag;
+
+    this.getReal = function () {
+        return real;
+    };
+    this.getImag = function () {
+        return imag;
+    };
+};
+Number.prototype.toComplex = function () {
+    return new Complex(this.valueOf(), 0);
+};
+Complex.prototype = new Number();
+Complex.prototype.toString = function () {
+    var real = this.getReal(),
+        imag = this.getImag(),
+        str = real.toString();
+
+    if (imag  === 0) {
+        return str;
+    }
+    if (imag > 0) {
+        str  += '+';
+    }
+    if (imag === 1) {
+        str += 'i';
+    } else if (imag === -1) {
+        str += '-i';
+    } else {
+        str += imag + 'i';
+    }
+    return str;
+};
+Complex.prototype.toString = function () {
+    var real = this.getReal(),
+        imag = this.getImag(),
+        str = real.toString();
+
+    if (imag  === 0) {
+        return str;
+    }
+    if (imag > 0) {
+        str  += '+';
+    }
+    if (imag === 1) {
+        str += 'i';
+    } else if (imag === -1) {
+        str += '-i';
+    } else {
+        str += imag + 'i';
+    }
+    return str;
+};
+Complex.prototype.isEqual = function (z) {
+    if (z instanceof Integer ||
+        z instanceof Rational ||
+        typeof(z) === 'number') {
+        return this.isEqual(z.toComplex());
+    }
+    return this.getReal() === z.getReal() && this.getImag() === z.getImag();
+};
+Complex.prototype.neg = function () {
+    return new Complex(this.getReal().neg(), this.getImag().neg());
+};
+Complex.prototype.conjugate = function () {
+    return new Complex(this.getReal(), this.getImag().neg());
+};
+Complex.prototype.isReal = function() {
+    return this.getImag() === 0;
+};
+Complex.prototype.getSign = function () {
+    var real;
+    if (this.isReal()) {
+        real = this.getReal();
+        if (real > 0) {
+            return 1;
+        }
+        if (real === 0) {
+            return 0;
+        }
+        if (real < 0) {
+            return -1;
+        }
+    }
+    throw {
+        type: 'getSign',
+        message: 'wrong type argument: ' + this
+    };
+};
+Complex.prototype.isZero = function () {
+    if (this.isReal()) {
+        return this.getSign() === 0;
+    }
+    return this.getReal().isZero() && this.getImag().isZero();
+};
+Complex.prototype.isPositive = function () {
+    return this.getSign() === 1;
+};
+Complex.prototype.isNegative = function () {
+    return this.getSign() === -1;
+};
+Complex.prototype.add = function (z) {
+    if (z instanceof Integer ||
+        z instanceof Rational ||
+        typeof(z) === 'number') {
+        return this.add(z.toComplex());
+    }
+    return new Complex(this.getReal() + z.getReal(),
+                       this.getImag() + z.getImag());
+};
+Complex.prototype.sub = function (z) {
+    if (z instanceof Integer ||
+        z instanceof Rational ||
+        typeof(z) === 'number') {
+        return this.sub(z.toComplex());
+    }
+    return new Complex(this.getReal() - z.getReal(),
+                       this.getImag() - z.getImag());
+};
+Complex.prototype.mul = function (z) {
+    if (z instanceof Integer ||
+        z instanceof Rational ||
+        typeof(z) === 'number') {
+        return this.mul(z.toComplex());
+    }
+    var real = this.getReal() * z.getReal() - this.getImag() * z.getImag(),
+        imag = this.getReal() * z.getImag() + this.getImag() * z.getReal();
+    
+    return new Complex(real, imag);
+};
+Complex.prototype.div = function (z) {
+    if (z instanceof Integer ||
+        z instanceof Rational ||
+        typeof(z) === 'number') {
+        return this.div(z.toComplex());
+    }
+    var z1 = z.conjugate(),
+        z2 = this.mul(z1),
+        n = z.mul(z1).getReal(),
+        real = z2.getReal() / n,
+        imag = z2.getImag() / n;
+
+    return new Complex(real, imag);
+};
+Complex.prototype.lt = function (z) {
+    return this.sub(z).isNegative();
+};
+Complex.prototype.le = function (z) {
+    return this.isEqual(z) || this.lt(z);
+};
+Complex.prototype.gt = function (z) {
+    return this.sub(z).isPositive();
+};
+Complex.prototype.ge = function (z) {
+    return this.isEqual(z) || this.gt(z);
+};
+Number.prototype = new Complex();
+Number.prototype.constructor = Number;
+Number.prototype.lt = function (z) {
+    return this.sub(z).isNegative();
+};
+Number.prototype.le = function (z) {
+    return this.isEqual(z) || this.lt(z);
+};
+Number.prototype.gt = function (z) {
+    return this.sub(z).isPositive();
+};
+Number.prototype.ge = function (z) {
+    return this.isEqual(z) || this.lt(z);
+};
+Number.prototype.add = function (z) {
+    if (z instanceof Complex) {
+        return this.toComplex().add(z);
+    }
+    if (typeof z === 'number') {
+        return this.valueOf() + z;
+    }
+    return this.add(z.toNumber());
+};
+Number.prototype.sub = function (z) {
+    if (z instanceof Complex) {
+        return this.toComplex().sub(z);
+    }
+    if (typeof z === 'number') {
+        return this.valueOf() - z;
+    }
+    return this.sub(z.toNumber());
+};
+Number.prototype.mul = function (z) {
+    if (z instanceof Complex) {
+        return this.toComplex().mul(z);
+    }
+    if (typeof z === 'number') {
+        return this.valueOf() * z;
+    }
+    return this.mul(z.toNumber());
+};
+Number.prototype.div = function (z) {
+    if (z instanceof Complex) {
+        return this.toComplex().div(z);
+    }
+    if (typeof z === 'number') {
+        return this.valueOf() / z;
+    }
+    return this.div(z.toNumber());
+};
+Rational = function (num, den) {    
+    var num = num,
+        den = den,
+        sign;
+    
+    if (num.isZero()) {
+        sign = 0;
+    } else {        
+        sign = num.getSign() * den.getSign();
+    }
+    num = num.abs();
+    den = den.abs();
+    this.getSign = function () {
+        return sign;
+    }
+    this.getNumerator = function () {
+        return num;
+    };
+    this.setNumerator = function (n) {
+        sign *= n.getSign();
+        num = n.abs();
+    };
+    this.getDenominator = function () {
+        return den;
+    };
+    this.setDenominator = function (n) {
+        sign *= n.getSign();
+        den = n.abs();
+    };
+};
+Rational.prototype.toNumber = function () {
+    var sign = this.getSign(),
+        num,
+        den,
+        q,
+        r;
+
+    if (sign === 0) {
+        return 0;
+    }
+    num = this.getNumerator().abs();
+    den = this.getDenominator().abs();
+    q = num.floorQuotient(den);
+    r = num.floorRemainder(den);
+    return q.add(r.toNumber().div(den));
+};
+Rational.prototype.toComplex = function () {
+    return new Complex(this.toNumber(), 0);
+};
+Rational.prototype.toString = function () {
+    var num,
+        den,
+        result = '';
+    
+    this.canonicalize();
+    if (this.getSign() === -1) {
+        result += '-';
+    }
+    num = this.getNumerator();
+    den = this.getDenominator();
+
+    result += num + '/' + den;
+    
+    return result;
+};
+Rational.prototype.isEqual = function (z) {
+    if (z instanceof Integer) {
+        return this.isEqual(z.toRational());
+    }
+    if (typeof z === 'number') {
+        return this.toNumber().isEqual(z);
+    }
+    if (z instanceof Complex) {
+        return this.toComplex().isEqual(z);
+    }
+    this.canonicalize();
+    z.canonicalize();
+    return this.toString() === z.toString();
+};
+Rational.prototype.lt = function (z) {
+    return this.sub(z).isNegative();
+};
+Rational.prototype.le = function (z) {
+    return this.isEqual(z) || this.lt(z);
+};
+Rational.prototype.gt = function (z) {
+    return this.sub(z).isPositive();
+};
+Rational.prototype.ge = function (z) {
+    return this.isEqual(z) || this.gt(z);
+};
+Rational.prototype.canonicalize = function () {
+    var num = this.getNumerator(),
+        den = this.getDenominator(),
+        g = num.gcd(den);
+
+    this.setNumerator(num.floorQuotient(g));
+    this.setDenominator(den.floorQuotient(g));
+};
+Rational.prototype.neg = function () {
+    return this.mul(new Integer('-1'));
+};
+Rational.prototype.isZero = function () {
+    return this.getSign() === 0;
+};
+Rational.prototype.isPositive = function () {
+    return this.getSign() === 1;
+};
+Rational.prototype.isNegative = function () {
+    return this.getSign() === -1;
+};
+Rational.prototype.add = function (z) {
+    if (z instanceof Integer) {
+        return this.add(z.toRational());
+    }
+    if (typeof z === 'number') {
+        return this.toNumber().add(z);
+    }
+    if (z instanceof Complex) {
+        return this.toComplex().add(z);
+    }
+    var num1 = this.getNumerator(),
+        den1 = this.getDenominator(),
+        sign1 = this.getSign(),
+        num2 = z.getNumerator(),
+        den2 = z.getDenominator(),
+        sign2 = z.getSign();
+
+    if (sign1 === -1) {
+        num1 = num1.neg();
+    }
+    if (sign2 === -1) {
+        num2 = num2.neg();
+    }
+    return new Rational(num1.mul(den2).add(num2.mul(den1)), den1.mul(den2));
+};
+Rational.prototype.sub = function (z) {
+    return this.add(z.neg());
+};
+Rational.prototype.mul = function (z) {
+    if (z instanceof Integer) {
+        return this.mul(z.toRational());
+    }
+    if (typeof z === 'number') {
+        return this.toNumber().mul(z);
+    }
+    if (z instanceof Complex) {
+        return this.toComplex().mul(z);
+    }
+    var sign = this.getSign() * z.getSign();
+    sign = new Integer(sign.toString());
+    return new Rational(this.getNumerator().mul(z.getNumerator()).mul(sign),
+                        this.getDenominator().mul(z.getDenominator()));
+
+};
+Rational.prototype.div = function (z) {
+    if (z instanceof Integer) {
+        return this.toRational().div(z);
+    }
+    if (typeof z === 'number') {
+        return this.toNumber().div(z);
+    }
+    if (z instanceof Complex) {
+        return this.toComplex().div(z);
+    }    
+    var sign = this.getSign() * z.getSign();
+    sign = new Integer(sign.toString());
+    return new Rational(this.getNumerator().mul(z.getDenominator()).mul(sign),
+                        this.getDenominator().mul(z.getNumerator()));
+};
+Integer = function (s) {    
     var sign = 1,
         nums = [],
         len = 0,
@@ -27,8 +441,6 @@ Integer = function (s) {
         return nums.slice();
     };
     this.copy = function () {
-        var s0 = s;
-
         return new Integer(s);
     };
 };
@@ -39,7 +451,7 @@ Integer.prototype.toNumber = function () {
     return parseFloat(this.toString());
 };
 Integer.prototype.toComplex = function () {
-    return new Complex(this.toNumber(), 0);
+    return this.toRational().toComplex();
 };
 Integer.prototype.toString = function () {
     var result = '',
@@ -78,44 +490,16 @@ Integer.prototype.isEqual = function (z) {
     return this.toString() === z.toString();
 };
 Integer.prototype.lt = function (z) {
-    if (z instanceof Rational) {
-        return this.toRational().lt(z);
-    }
-    if (typeof z === 'number') {
-        return this.toNumber().lt(z);
-    }
     return this.sub(z).isNegative();
 };
 Integer.prototype.le = function (z) {
-    if (z instanceof Rational) {
-        return this.toRational().le(z);
-    }
-    if (typeof z === 'number') {
-        return this.toNumber().le(z);
-    }
-    var t = this.sub(z);
-    
-    return t.isNegative() || t.isZero();
+    return this.isEqual(z) || this.lt(z);
 };
 Integer.prototype.gt = function (z) {
-    if (z instanceof Rational) {
-        return this.toRational().gt(z);
-    }
-    if (typeof z === 'number') {
-        return this.toNumber().gt(z);
-    }
     return this.sub(z).isPositive();
 };
 Integer.prototype.ge = function (z) {
-    if (z instanceof Rational) {
-        return this.toRational().ge(z);
-    }
-    if (typeof z === 'number') {
-        return this.toNumber().ge(z);
-    }
-    var t = this.sub(z);
-    
-    return t.isPositive() || t.isZero();
+    return this.isEqual(z) || this.gt(z);
 };
 Integer.prototype.gcd = function (n) {
     var x = this.abs(),
@@ -420,353 +804,3 @@ Integer.prototype.floorRemainder = function (n) {
     return this.sub(n.mul(this.floorQuotient(n)));
 };
 
-Rational = function (num, den) {
-    var num,
-        den,
-        sign;
-
-    if (num.isZero()) {
-        sign = 0;
-    } else {
-        sign = num.getSign() * den.getSign();
-    }
-    num = num.abs();
-    den = den.abs();
-    this.getSign = function () {
-        return sign;
-    }
-    this.getNumerator = function () {
-        return num;
-    };
-    this.setNumerator = function (n) {
-        sign *= n.getSign();
-        num = n.abs();
-    };
-    this.getDenominator = function () {
-        return den;
-    };
-    this.setDenominator = function (n) {
-        sign *= n.getSign();
-        den = n.abs();
-    };
-};
-Rational.prototype.toNumber = function () {
-    return this.getNumerator().div(this.getDenominator()).toNumber();
-};
-Rational.prototype.toComplex = function () {
-    return new Complex(this.toNumber(), 0);
-};
-Rational.prototype.toString = function () {
-    var num,
-        den,
-        result = '';
-    
-    this.canonicalize();
-    if (this.getSign() === -1) {
-        result += '-';
-    }
-    num = this.getNumerator();
-    den = this.getDenominator();
-
-    result += num + '/' + den;
-    
-    return result;
-};
-Rational.prototype.isEqual = function (z) {
-    if (z instanceof Integer) {
-        return this.isEqual(z.toRational());
-    }
-    if (typeof z === 'number') {
-        return this.toNumber().isEqual(z);
-    }
-    if (z instanceof Complex) {
-        return this.toComplex().isEqual(z);
-    }
-    this.canonicalize();
-    z.canonicalize();
-    return this.toString() === z.toString();
-};
-Rational.prototype.lt = function (z) {
-    if (z instanceof Integer) {
-        return this.lt(z.toRational());
-    }
-    if (typeof z === 'number') {
-        return this.toNumber().lt(z);
-    }
-    return this.sub(z).isNegative();
-};
-Rational.prototype.le = function (z) {
-    return this.isEqual(z) || this.lt(z);
-};
-Rational.prototype.gt = function (z) {
-    if (z instanceof Integer) {
-        return this.gt(z.toRational());
-    }
-    if (typeof z === 'number') {
-        return this.toNumber().gt(z);
-    }
-    return this.sub(z).isPositive();
-};
-Rational.prototype.ge = function (z) {
-    return this.isEqual(z) || this.gt(z);
-};
-Rational.prototype.canonicalize = function () {
-    var num = this.getNumerator(),
-        den = this.getDenominator(),
-        g = num.gcd(den);
-
-    this.setNumerator(num.floorQuotient(g));
-    this.setDenominator(den.floorQuotient(g));
-};
-Rational.prototype.neg = function () {
-    return new Rational(this.getNumerator().neg(), this.getDenominator());
-};
-Rational.prototype.isZero = function () {
-    return this.getSign() === 0;
-};
-Rational.prototype.isPositive = function () {
-    return this.getSign() === 1;
-};
-Rational.prototype.isNegative = function () {
-    return this.getSign() === -1;
-};
-Rational.prototype.add = function (z) {
-    if (z instanceof Integer) {
-        return this.add(z.toRational());
-    }
-    if (typeof z === 'number') {
-        return this.toNumber().add(z);
-    }
-    if (z instanceof Complex) {
-        return this.toComplex().add(z);
-    }
-    var num1 = this.getNumerator(),
-        den1 = this.getDenominator(),
-        sign1 = this.getSign(),
-        num2 = z.getNumerator(),
-        den2 = z.getDenominator(),
-        sign2 = z.getSign();
-
-    if (sign1 === -1) {
-        num1 = num1.neg();
-    }
-    if (sign2 === -1) {
-        num2 = num2.neg();
-    }
-    return new Rational(num1.mul(den2).add(num2.mul(den1)), den1.mul(den2));
-};
-Rational.prototype.sub = function (z) {
-    return this.add(z.neg());
-};
-Rational.prototype.mul = function (z) {
-    if (z instanceof Integer) {
-        return this.mul(z.toRational());
-    }
-    if (typeof z === 'number') {
-        return this.toNumber().mul(z);
-    }
-    if (z instanceof Complex) {
-        return this.toComplex().mul(z);
-    }
-    return new Rational(this.getNumerator().mul(z.getNumerator()),
-                        this.getDenominator().mul(z.getDenominator()));
-};
-Rational.prototype.div = function (z) {
-    if (z instanceof Integer) {
-        return this.toRational().div(z);
-    }
-    if (typeof z === 'number') {
-        return this.toNumber().div(z);
-    }
-    if (z instanceof Complex) {
-        return this.toComplex().div(z);
-    }
-    return new Rational(this.getNumerator().mul(z.getDenominator()),
-                        this.getDenominator().mul(z.getNumerator()));
-};
-Number.prototype.toComplex = function () {
-    return new Complex(this, 0);
-};
-Number.prototype.isEqual = function (z) {
-    if (z instanceof Integer || z instanceof Rational) {
-        return this.isEqual(z.toNumber());
-    }
-    if (z instanceof Complex) {
-        return this.toComplex().div(z);
-    }
-    return this === z;
-};
-Number.prototype.lt = function (z) {
-    if (z instanceof Integer) {
-        return this.lt(z.toNumber());
-    }
-    return this.sub(z).isNegative();
-};
-Number.prototype.le = function (z) {
-    return this.isEqual(z) || this.lt(z);
-};
-Number.prototype.gt = function (z) {
-    if (z instanceof Integer) {
-        return this.gt(z.toNumber());
-    }
-    return this.sub(z).isPositive();
-};
-Number.prototype.ge = function (z) {
-    return this.isEqual(z) || this.gt(z);
-};
-Number.prototype.isZero  = function () {
-    return this === 0;
-};
-Number.prototype.isPositive = function () {
-    return this > 0;
-};
-Number.prototype.isNegative = function () {
-    return this < 0;
-};
-Number.prototype.getSign = function () {
-    if (this < 0) {
-        return -1;
-    }
-    if (this === 0) {
-        return 0;
-    }
-    if (this > 0) {
-        return 1;
-    }
-};
-Number.prototype.neg = function () {
-    return -this;
-};
-Number.prototype.isZero = function () {
-    return this.getSign() === 0;
-};
-Number.prototype.isPositive = function () {
-    return this.getSign() === 1;
-};
-Number.prototype.isNegative = function () {
-    return this.getSign() === -1;
-};
-Number.prototype.add = function (z) {
-    if (z instanceof Integer || z instanceof Rational) {
-        return this.add(z.toNumber());
-    }
-    if (z instanceof Complex) {
-        return this.toComplex().add(z);
-    }    
-    return this.add(z);
-};
-Number.prototype.sub = function (x) {
-    if (z instanceof Integer || z instanceof Rational) {
-        return this.sub(z.toNumber());
-    }
-    if (z instanceof Complex) {
-        return this.toComplex().sub(z);
-    }    
-    return this - z;
-};
-Number.prototype.mul = function (z) {
-    if (z instanceof Integer || z instanceof Rational) {
-        return this.mul(z.toNumber());
-    }
-    if (z instanceof Complex) {
-        return this.toComplex().mul(z);
-    }    
-    return this * z;
-};
-Number.prototype.div = function (x) {
-    if (z instanceof Integer || z instanceof Rational) {
-        return this.div(z.toNumber());
-    }
-    if (z instanceof Complex) {
-        return this.toComplex().div(z);
-    }    
-    return this / z;
-};
-Complex = function (real, imag) {
-    var real = real,
-        imag = imag;
-
-    this.getReal = function () {
-        return real;
-    };
-    this.getImag = function () {
-        return imag;
-    };
-};
-Complex.prototype.toString = function () {
-    var real = this.getReal(),
-        imag = this.getImag(),
-        str = real.toString();
-
-    if (imag  === 0) {
-        return str;
-    }
-    if (imag > 0) {
-        str  += '+';
-    }
-    if (imag === 1) {
-        str += 'i';
-    } else if (imag === -1) {
-        str += '-i';
-    } else {
-        str += imag + 'i';
-    }
-    return str;
-};
-Complex.prototype.isEqual = function (z) {
-    if (z instanceof Integer ||
-        z instanceof Rational ||
-        typeof(z) === 'number') {
-        return this.isEqual(z.toComplex());
-    }
-    return this.getReal() === z.getReal() && this.getImag() === z.getImag();
-};
-Complex.prototype.neg = function () {
-    return new Complex(this.getReal().neg(), this.getImag().neg());
-};
-Complex.prototype.conjugate = function () {
-    return new Complex(this.getReal(), this.getImag().neg());
-};
-Complex.prototype.add = function (z) {
-    if (z instanceof Integer ||
-        z instanceof Rational ||
-        typeof(z) === 'number') {
-        return this.add(z.toComplex());
-    }
-    return new Complex(this.getReal() + z.getReal(),
-                       this.getImag() + z.getImag());
-};
-Complex.prototype.sub = function (z) {
-    if (z instanceof Integer ||
-        z instanceof Rational ||
-        typeof(z) === 'number') {
-        return this.sub(z.toComplex());
-    }
-    return new Complex(this.getReal() - z.getReal(),
-                       this.getImag() - z.getImag());
-};
-Complex.prototype.mul = function (z) {
-    if (z instanceof Integer ||
-        z instanceof Rational ||
-        typeof(z) === 'number') {
-        return this.mul(z.toComplex());
-    }
-    var real = this.getReal() * z.getReal() - this.getImag() * z.getImag(),
-        imag = this.getReal() * z.getImag() + this.getImag() * z.getReal();
-    
-    return new Complex(real, imag);
-};
-Complex.prototype.div = function (z) {
-    if (z instanceof Integer ||
-        z instanceof Rational ||
-        typeof(z) === 'number') {
-        return this.div(z.toComplex());
-    }
-    var z1 = z.conjugate(),
-        z2 = this.mul(z1),
-        n = z.mul(z1).getReal(),
-        real = z2.getReal() / n,
-        imag = z2.getImag() / n;
-
-    return new Complex(real, imag);
-};
