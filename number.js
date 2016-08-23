@@ -6,7 +6,8 @@
         Integer,
         RADIX = Math.pow(10, 5),
         NUM_SIZE = Math.log10(RADIX),
-        sign;
+        sign,
+        series;
 
     sign = function (n) {
         if (n > 0) {
@@ -18,6 +19,16 @@
         if (n < 0) {
             return -1;
         }
+    };
+    
+    series = function (start, end, term) {
+        var i,
+            result = 0;
+
+        for (i = start; i <= end; i += 1) {
+            result += term(i);
+        }
+        return result;
     };
 
     Number.prototype.neg = function () {
@@ -42,12 +53,6 @@
     Number.prototype.isNegative = function () {
         return this.getSign() === -1;
     };
-    Number.prototype.isEqual =function (z) {
-        if (typeof z === 'number') {
-            return this.valueOf() === z;
-        }
-        return z.isEqual(this.valueOf());
-    };
     Complex = function (real, imag) {
         if (!(this instanceof Complex)) {
             return new Complex(real, imag);
@@ -68,40 +73,42 @@
     Complex.prototype.toString = function () {
         var real = this.getReal(),
             imag = this.getImag(),
-            str = real.toString();
+            str = '';
 
+        if (typeof window === 'undefined') {
+            if (real !== 0) {
+                str += real.toString();
+            }
+            if (imag  === 0) {
+                return str;
+            }
+            if (imag > 0) {
+                str  += '+';
+            }
+            if (imag === 1) {
+                str += 'i';
+            } else if (imag === -1) {
+                str += '-i';
+            } else {
+                str += imag + 'i';
+            }
+            return str;
+        }
+        if (real !== 0) {
+            str += '<mn>' + real.toString() + '</mn>';
+        }
         if (imag  === 0) {
             return str;
         }
         if (imag > 0) {
-            str  += '+';
+            str  += '<mo>+</mo>';
         }
         if (imag === 1) {
-            str += 'i';
+            str += '<mi>i</mi>';
         } else if (imag === -1) {
-            str += '-i';
+            str += '<mo>-</mo><mi>i</mi>';
         } else {
-            str += imag + 'i';
-        }
-        return str;
-    };
-    Complex.prototype.toString = function () {
-        var real = this.getReal(),
-            imag = this.getImag(),
-            str = real.toString();
-
-        if (imag  === 0) {
-            return str;
-        }
-        if (imag > 0) {
-            str  += '+';
-        }
-        if (imag === 1) {
-            str += 'i';
-        } else if (imag === -1) {
-            str += '-i';
-        } else {
-            str += imag + 'i';
+            str += '<mn>' + imag + '</mn>' + '<mi>i</mi>';
         }
         return str;
     };
@@ -190,6 +197,9 @@
     Complex.prototype.ge = function (z) {
         return this.isEqual(z) || this.gt(z);
     };
+    Number.prototype.isEqual =function (z) {
+        return this.sub(z).isZero();
+    };    
     Number.prototype.lt = function (z) {
         return this.sub(z).isNegative();
     };
@@ -410,6 +420,7 @@
     };
     Rational.prototype.getReal = function () {
         var sign = new Integer(this.getSign().toString());
+        
         return new Rational(this.getNumerator().mul(sign),
                             this.getDenominator())
     };
@@ -811,5 +822,5 @@
     global.Complex = Complex;
     global.Rational = Rational;
     global.Integer = Integer;
-    
+
 }(this['window'] || global));
