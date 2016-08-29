@@ -254,6 +254,9 @@
     Number.prototype.getImag = function () {
         return 0;
     };
+    Number.prototype.abs = function () {
+        return Math.abs(this);
+    };
     Rational = function (num, den) {
         if (!(this instanceof Rational)) {
             return new Rational(num, den);
