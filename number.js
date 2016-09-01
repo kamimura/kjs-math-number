@@ -197,6 +197,18 @@
     Complex.prototype.ge = function (z) {
         return this.isEqual(z) || this.gt(z);
     };
+    Complex.prototype.abs = function () {
+        var real = this.getReal(),
+            imag = this.getImag();
+
+        return Math.sqrt(Math.pow(real, 2) + Math.pow(imag, 2));
+    };
+    Complex.prototype.magnitude = function () {
+        var real = this.getReal(),
+            imag = this.getImag();
+
+        return Math.sqrt(Math.pow(real, 2) + Math.pow(imag, 2));
+    };        
     Number.prototype.isEqual =function (z) {
         return this.sub(z).isZero();
     };    
@@ -826,4 +838,4 @@
     global.Rational = Rational;
     global.Integer = Integer;
 
-}(this['window'] || global));
+}(this.window || global));
